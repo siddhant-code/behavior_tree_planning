@@ -82,8 +82,35 @@ class BehaviorPlanner:
         """
         # TODO: Implement the behavior tree structure
         # Hint: Use Sequence for each behavior branch, Selector for the root
+
+        lane_change_seq = Sequence("LaneChange",
+                [
+                    IsVehicleAhead(),
+                    IsVehicleSlow(),
+                    IsLaneChangeSafe(),
+                    SetLaneChangeCommand(self.lane_width, self.speed_limit)
+                ])
         
-        pass  # Remove this line when implementing
+        follow_vehicle_seq = Sequence("FollowVehicle",
+                [
+                    IsVehicleAhead(),
+                    SetFollowCommand()
+                ])
+        
+        lane_keep_seq = Sequence("LaneKeep",
+                [
+                    SetLaneKeepCommand(self.speed_limit)
+                ])
+
+        root = Selector('root',
+                [
+                    lane_change_seq,
+                    follow_vehicle_seq,
+                    lane_keep_seq
+                ])
+
+        return root
+        
     
     def get_command(self, env_state: EnvironmentState) -> BehaviorCommand:
         """

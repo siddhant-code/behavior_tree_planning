@@ -78,8 +78,8 @@ class IsVehicleAhead(ConditionNode):
             if vehicle_ahead_distance < self.distance_threshold:
                 speed_diff = speed_limit - vehicle_ahead_speed
                 if 1 < speed_diff:
-                    return True
-        return False
+                    return Status.SUCCESS
+        return Status.FAILURE
 
 
 
@@ -116,9 +116,9 @@ class IsVehicleSlow(ConditionNode):
             speed_limit = blackboard.env_state.speed_limit
             speed_diff = speed_limit - vehicle_ahead_speed
             if  self.slow_threshold < speed_diff:
-                return True
+                return Status.SUCCESS
             
-        return False
+        return Status.FAILURE
 
 
 class IsLaneChangeSafe(ConditionNode):
@@ -155,24 +155,26 @@ class IsLaneChangeSafe(ConditionNode):
             Status.FAILURE otherwise
         """
         # TODO: Implement this condition
+        
+        # left lane
         is_left_lane_available = blackboard.env_state.left_lane_exists
 
-        # left lane
         if is_left_lane_available:
             is_left_lane_clear = blackboard.env_state.left_lane_clear
             if is_left_lane_clear:
                 blackboard.set('target_lane', 'left')
-                return True
-        else:
-            is_right_lane_available = blackboard.env_state.right_lane_exists
+                return Status.SUCCESS
+        
+        # right lane
+        is_right_lane_available = blackboard.env_state.right_lane_exists
 
-            if is_right_lane_available:
-                is_right_lane_clear = blackboard.env_state.right_lane_clear
-                if is_right_lane_clear:
-                    blackboard.set('target_lane', 'right')
-                    return True
+        if is_right_lane_available:
+            is_right_lane_clear = blackboard.env_state.right_lane_clear
+            if is_right_lane_clear:
+                blackboard.set('target_lane', 'right')
+                return Status.SUCCESS
                 
-        return False
+        return Status.FAILURE
   
         
 
@@ -317,7 +319,7 @@ class SetLaneChangeCommand(ActionNode):
         behavior_command.T = 4.0
 
         blackboard.behavior_command = behavior_command
-        
+
         return Status.SUCCESS
 
 
