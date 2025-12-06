@@ -68,8 +68,19 @@ class IsVehicleAhead(ConditionNode):
         """
         # TODO: Implement this condition
         # Hint: Access environment with blackboard.env_state
-        
-        pass  # Remove this line when implementing
+
+        is_vehicle_ahead = blackboard.env_state.vehicle_ahead
+        if is_vehicle_ahead:
+            vehicle_ahead_distance = blackboard.env_state.vehicle_ahead_distance
+            vehicle_ahead_speed = blackboard.env_state.vehicle_ahead_speed
+            speed_limit = blackboard.env_state.speed_limit
+
+            if vehicle_ahead_distance < self.distance_threshold:
+                speed_diff = speed_limit - vehicle_ahead_speed
+                if 1 < speed_diff:
+                    return True
+        return False
+
 
 
 class IsVehicleSlow(ConditionNode):
@@ -99,9 +110,15 @@ class IsVehicleSlow(ConditionNode):
             Status.SUCCESS if vehicle ahead is slow
             Status.FAILURE otherwise
         """
-        # TODO: Implement this condition
-        
-        pass  # Remove this line when implementing
+        is_vehicle_ahead = blackboard.env_state.vehicle_ahead
+        if is_vehicle_ahead:
+            vehicle_ahead_speed = blackboard.env_state.vehicle_ahead_speed
+            speed_limit = blackboard.env_state.speed_limit
+            speed_diff = speed_limit - vehicle_ahead_speed
+            if  self.slow_threshold < speed_diff:
+                return True
+            
+        return False
 
 
 class IsLaneChangeSafe(ConditionNode):
@@ -138,8 +155,26 @@ class IsLaneChangeSafe(ConditionNode):
             Status.FAILURE otherwise
         """
         # TODO: Implement this condition
+        is_left_lane_available = blackboard.env_state.left_lane_exists
+
+        # left lane
+        if is_left_lane_available:
+            is_left_lane_clear = blackboard.env_state.left_lane_clear
+            if is_left_lane_clear:
+                blackboard.set('target_lane', 'left')
+                return True
+        else:
+            is_right_lane_available = blackboard.env_state.right_lane_exists
+
+            if is_right_lane_available:
+                is_right_lane_clear = blackboard.env_state.right_lane_clear
+                if is_right_lane_clear:
+                    blackboard.set('target_lane', 'right')
+                    return True
+                
+        return False
+  
         
-        pass  # Remove this line when implementing
 
 
 # =============================================================================
