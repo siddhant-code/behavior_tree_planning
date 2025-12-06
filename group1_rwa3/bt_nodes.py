@@ -190,7 +190,7 @@ class SetLaneKeepCommand(ActionNode):
     def __init__(self, speed_limit: float = SPEED_LIMIT):
         super().__init__("SetLaneKeepCommand")
         self.speed_limit = speed_limit
-    
+        
     def update(self) -> Status:
         """
         TODO: Implement this method.
@@ -208,8 +208,16 @@ class SetLaneKeepCommand(ActionNode):
             Status.SUCCESS always
         """
         # TODO: Implement this action
-        
-        pass  # Remove this line when implementing
+        behavior_command: BehaviorCommand = BehaviorCommand()
+    
+        behavior_command.behavior = BehaviorType.LANE_KEEP
+        behavior_command.target_d = 0.0 
+        behavior_command.target_speed = self.speed_limit
+        behavior_command.T = 3.0 
+
+        blackboard.behavior_command = behavior_command
+
+        return Status.SUCCESS
 
 
 class SetFollowCommand(ActionNode):
@@ -242,8 +250,22 @@ class SetFollowCommand(ActionNode):
             Status.SUCCESS always
         """
         # TODO: Implement this action
+        vehicle_ahead_speed = blackboard.env_state.vehicle_ahead_speed
+
+        follow_speed = vehicle_ahead_speed - self.speed_buffer
+
+        if 0 <= follow_speed:
+            behavior_command: BehaviorCommand = BehaviorCommand()
+
+            behavior_command.behavior = BehaviorType.FOLLOW_VEHICLE
+            behavior_command.target_d = 0.0 
+            behavior_command.target_speed = follow_speed
+            behavior_command.T = 5.0 
+
+            blackboard.behavior_command = behavior_command
+
+        return Status.SUCCESS
         
-        pass  # Remove this line when implementing
 
 
 class SetLaneChangeCommand(ActionNode):
@@ -278,8 +300,26 @@ class SetLaneChangeCommand(ActionNode):
             Status.SUCCESS always
         """
         # TODO: Implement this action
+        target_lane = blackboard.get('target_lane')
+
+        if target_lane == 'left':
+            behavior = BehaviorType.LANE_CHANGE_LEFT
+            target_d =  self.lane_width
+        elif target_lane == 'right':
+            behavior = BehaviorType.LANE_CHANGE_RIGHT
+            target_d =  -self.lane_width
         
-        pass  # Remove this line when implementing
+        behavior_command: BehaviorCommand = BehaviorCommand()
+
+        behavior_command.behavior = behavior
+        behavior_command.target_d = target_d 
+        behavior_command.target_speed = self.speed_limit
+        behavior_command.T = 4.0
+
+        blackboard.behavior_command = behavior_command
+        
+        return Status.SUCCESS
+
 
 
 # =============================================================================
