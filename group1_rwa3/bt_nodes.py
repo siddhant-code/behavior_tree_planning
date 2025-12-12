@@ -213,7 +213,7 @@ class SetLaneKeepCommand(ActionNode):
         behavior_command: BehaviorCommand = BehaviorCommand()
     
         behavior_command.behavior = BehaviorType.LANE_KEEP
-        behavior_command.target_d = 0.0 
+        behavior_command.target_d = blackboard.env_state.ego_d
         behavior_command.target_speed = self.speed_limit
         behavior_command.T = 3.0 
 
@@ -260,7 +260,7 @@ class SetFollowCommand(ActionNode):
             behavior_command: BehaviorCommand = BehaviorCommand()
 
             behavior_command.behavior = BehaviorType.FOLLOW_VEHICLE
-            behavior_command.target_d = 0.0 
+            behavior_command.target_d = blackboard.env_state.ego_d
             behavior_command.target_speed = follow_speed
             behavior_command.T = 5.0 
 
@@ -306,10 +306,10 @@ class SetLaneChangeCommand(ActionNode):
 
         if target_lane == 'left':
             behavior = BehaviorType.LANE_CHANGE_LEFT
-            target_d =  self.lane_width
+            target_d =   blackboard.env_state.ego_d + self.lane_width
         elif target_lane == 'right':
             behavior = BehaviorType.LANE_CHANGE_RIGHT
-            target_d =  -self.lane_width
+            target_d =   blackboard.env_state.ego_d - self.lane_width
         
         behavior_command: BehaviorCommand = BehaviorCommand()
 
