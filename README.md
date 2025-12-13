@@ -1,4 +1,4 @@
-# ENPM818Z: On-Road Automated Vehicles
+## RWA3: Behavioral Planning with Behavior Trees
 
 ## Group 01
 - (121322517): Pon Aswin Sankaralingam

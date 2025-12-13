@@ -39,10 +39,9 @@ the current driving situation.
 ## Dependencies
 
 ### System Requirements
-- **Ubuntu 22.04/24.04 LTS**
-- **ROS 2 Jazzy/ Humble**
-- **colcon** build system
-- **python**: numpy, matplotlib
+- **Ubuntu**
+- **Carla**
+- **python**: numpy, matplotlib, pygame, carla
 
 ## Setup
 
@@ -55,6 +54,49 @@ source venv/bin/activate  # Linux/Mac
 # Install dependencies
 pip install -r requirements.txt
 ```
+
+## Changes
+
+```bash
+bt_nodes.py (Line no.: 439)
+
+# BEFORE
+# Test 5: SetFollowCommand
+print("\n5. Testing SetFollowCommand:")
+
+env.vehicle_ahead_speed = 22.0
+node = SetFollowCommand()
+result = node.update()
+cmd = blackboard.behavior_command
+expected_speed = 20.0  # 22 - 2 buffer
+----------------------------------------------
+# AFTER
+# Test 5: SetFollowCommand
+print("\n5. Testing SetFollowCommand:")
+
+env.vehicle_ahead_speed = 22.0
+node = SetFollowCommand(speed_buffer = 2.0) # provided argument to the class
+result = node.update()
+cmd = blackboard.behavior_command
+expected_speed = 20.0  # 22 - 2 buffer
+
+```
+
+```bash
+carla_interface.py (Line no.: 80)
+
+# BEFORE
+# Road parameters (should match bt_nodes.py)
+lane_width: float = 3.5
+speed_limit: float = 15.0  # m/s (~34 mph) 
+----------------------------------------------
+# AFTER
+# Road parameters (should match bt_nodes.py)
+lane_width: float = 3.5
+speed_limit: float = 31.0  # m/s (~70 mph) # default: 15
+
+```
+
 
 ## Testing
 
@@ -134,8 +176,6 @@ RESULTS: 16 passed, 0 failed
 
 ```bash
 $ python3 bt_nodes.py
-
-python3 bt_nodes.py 
 Testing Behavior Tree Nodes...
 
 1. Testing IsVehicleAhead:
@@ -157,12 +197,11 @@ Testing Behavior Tree Nodes...
    Lane keep: lane_keep, d=0.0, v=31.0 ✓
 
 5. Testing SetFollowCommand:
-   Follow: follow_vehicle, v=21.0 (expected 20.0) ✗
+   Follow: follow_vehicle, v=20.0 (expected 20.0) ✓
 
 6. Testing SetLaneChangeCommand:
    Lane change left: lane_change_left, d=3.5 ✓
    Lane change right: lane_change_right, d=-3.5 ✓
-
 ```
 
 ```bash
@@ -232,3 +271,35 @@ python3 simulator.py --no-viz --scenario overtake --duration 30
 - **blackboard**: Shared data structure for communication between nodes
 
 
+## CARLA Simulation
+
+```bash
+# Terminal 1
+cd /path/to/CARLA_0.9.16
+ ./CarlaUE4.sh -RenderOffScreen
+```
+
+```bash
+# Terminal 2
+cd /path/to/carla_simulator
+
+# Empty road - tests lane keeping
+python3 carla_simulator.py --scenario empty --duration 60
+
+# Follow vehicle - tests vehicle following
+python3 carla_simulator.py --scenario follow --duration 60
+
+# Overtake - tests lane change decisions
+python3 carla_simulator.py --scenario overtake --duration 90
+```
+
+
+
+
+## Carla Output Video
+
+-  Empty road    : https://drive.google.com/file/d/19d1LWUSoKJ6NlpzE4r0BAv5JvlZzCLNB/view?usp=sharing
+
+- Follow vehicle: https://drive.google.com/file/d/1T3t6_XsRCwhAGIP9qiWB7WeQOITRSTzu/view?usp=sharing
+
+- Overtake:  https://drive.google.com/file/d/1dBVbQJoi3Yzxrl3Bk0T5BkGCu-GWwkQY/view?usp=sharing
