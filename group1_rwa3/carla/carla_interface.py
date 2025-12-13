@@ -775,10 +775,11 @@ class CarlaInterface:
         left_lane: Optional[carla.Waypoint] = ego_waypoint.get_left_lane()
         right_lane: Optional[carla.Waypoint] = ego_waypoint.get_right_lane()
 
-        env.left_lane_exists = (left_lane is not None and 
-                                left_lane.lane_type == carla.LaneType.Driving)
-        env.right_lane_exists = (right_lane is not None and 
-                                 right_lane.lane_type == carla.LaneType.Driving)
+        env.left_lane_exists = ((left_lane is not None) and 
+                                (left_lane.lane_type == carla.LaneType.Driving))
+        env.right_lane_exists = ((right_lane is not None) and 
+                                 (right_lane.lane_type == carla.LaneType.Driving))
+        # print(f"left exist: {env.left_lane_exists}, right exist:{env.right_lane_exists}")
         
         # env.left_lane_exists = True   # TODO: Replace with actual check
         # env.right_lane_exists = True  # TODO: Replace with actual check
@@ -797,9 +798,8 @@ class CarlaInterface:
         for traffic in self.traffic_vehicles:
             if not traffic.is_alive:
                 continue
-            
+
             traffic_transform: carla.Transform = traffic.get_transform()
-            traffic_velocity: carla.Vector3D = traffic.get_velocity()
             
             # Calculate relative position
             rel_x, rel_d = self._calculate_relative_position(
@@ -812,20 +812,30 @@ class CarlaInterface:
         #     # TODO: Check if vehicle is in right lane, update right_lane_clear
 
             # Vehical ahead
-            if (abs(rel_d) < self.config.lane_width /2.0) and (rel_x > 0):
+            if (((abs(rel_d)) < (self.config.lane_width /2.0)) and (rel_x > 0)):
+                traffic_velocity: carla.Vector3D = traffic.get_velocity()
                 traffic_speed :float= np.sqrt(traffic_velocity.x**2 + traffic_velocity.y**2)
 
                 env.vehicle_ahead = True
                 env.vehicle_ahead_distance = rel_x
                 env.vehicle_ahead_speed = traffic_speed
+            else:
+                env.vehicle_ahead = False
+                env.vehicle_ahead_distance = self.config.detection_range
+                env.vehicle_ahead_speed = 0.0
+            
             # Vehicle Left
-            elif (self.config.lane_width /2.0 < rel_d < 1.5 * self.config.lane_width ):
+            
+            if ((rel_x > 0) and (self.config.lane_width /2.0 < rel_d) and (rel_d < 1.5 * self.config.lane_width )):
                 env.left_lane_clear = False
-            # Vehicle Right
-            elif (-1.5 * self.config.lane_width < rel_d < -self.config.lane_width /2.0):
-                env.right_lane_clear = False
+            else:
+                env.left_lane_clear = True
 
-            # print(f"rel_x: {rel_x}, rel_d:{rel_d}")
+            # Vehicle Right
+            if ((rel_x > 0) and(-1.5 * self.config.lane_width < rel_d) and (rel_d < -self.config.lane_width /2.0)):
+                env.right_lane_clear = False
+            else:
+                env.right_lane_clear = True
 
         return env
     
