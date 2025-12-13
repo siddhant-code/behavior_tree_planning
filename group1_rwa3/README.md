@@ -80,10 +80,6 @@ Key decisions:
 4. Matplotlib was used for visualization and to verify the correctness of the implementation.
 5. The target *d* value is defined relative to the ego vehicle’s current lateral position within the lane.
 
-Challenges:
-
-1. The vehicle doesn't seem to shift to left lane after first lane change. The force_lane_change() function seems to fail to steer the car to correct lane.
-
 ## Output
 
 Sample output:
