@@ -429,7 +429,7 @@ if __name__ == "__main__":
     print("\n5. Testing SetFollowCommand:")
     
     env.vehicle_ahead_speed = 22.0
-    node = SetFollowCommand()
+    node = SetFollowCommand(speed_buffer = 2.0)
     result = node.update()
     cmd = blackboard.behavior_command
     expected_speed = 20.0  # 22 - 2 buffer

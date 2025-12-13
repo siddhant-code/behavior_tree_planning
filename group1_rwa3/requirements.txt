@@ -3,3 +3,5 @@
 
 numpy>=1.20.0
 matplotlib>=3.5.0
+pygame>= 2.6.1
+carla==0.9.16

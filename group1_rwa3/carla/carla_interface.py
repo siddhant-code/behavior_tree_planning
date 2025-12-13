@@ -79,8 +79,8 @@ class CarlaConfig:
     
     # Road parameters (should match bt_nodes.py)
     lane_width: float = 3.5
-    speed_limit: float = 15.0  # m/s (~34 mph) - reduced for stable lane following
-    
+    speed_limit: float = 31.0  # m/s (~70 mph) # default: 15
+
     # Detection parameters
     detection_range: float = 100.0
     lane_change_gap: float = 25.0
@@ -743,35 +743,25 @@ class CarlaInterface:
         if self.ego_vehicle is None:
             return env
         
-        # =====================================================================
-        # TODO: Get ego vehicle state
-        # =====================================================================
-        # STEP 1: Get ego transform and velocity
-        # ego_transform = self.ego_vehicle.get_transform()
-        # ego_velocity = self.ego_vehicle.get_velocity()
-        # ego_speed = np.sqrt(ego_velocity.x**2 + ego_velocity.y**2 + ego_velocity.z**2)
-        
-        # STEP 2: Get waypoint for lane information
-        # ego_waypoint = self.map.get_waypoint(ego_transform.location)
-        
-        # STEP 3: Calculate lateral offset
-        # ego_d = self._calculate_lateral_offset(ego_transform, ego_waypoint)
-        
-
+        # Get ego vehicle state
+        # Calculate ego speed
         ego_vel: carla.Vector3D = self.ego_vehicle.get_velocity()
         speed: float = np.sqrt(ego_vel.x**2 + ego_vel.y**2 + ego_vel.z**2)
 
+        # Calculate lateral offset
         ego_transform: carla.Transform = self.ego_vehicle.get_transform()
+        # navigation waypoints
         ego_waypoint: carla.Waypoint = self.map.get_waypoint(ego_transform.location)
+        # lateral offset
         ego_d: float = self._calculate_lateral_offset(ego_transform, ego_waypoint)
         
-        env.ego_speed = speed  # TODO: Replace with actual speed
-        env.ego_d = ego_d      # TODO: Replace with actual lateral offset
-        env.speed_limit = self.config.speed_limit
+        env.ego_speed = speed  
+        env.ego_d = ego_d      
+
+        env.speed_limit = self.config.speed_limit # speed limit: from config 
+        # env.speed_limit = self.ego_vehicle.get_speed_limit()  # speed limit: from carla perception
         
-        # =====================================================================
-        # TODO: Check lane existence
-        # =====================================================================
+        # Check lane existence
         left_lane: Optional[carla.Waypoint] = ego_waypoint.get_left_lane()
         right_lane: Optional[carla.Waypoint] = ego_waypoint.get_right_lane()
 
@@ -779,40 +769,29 @@ class CarlaInterface:
                                 (left_lane.lane_type == carla.LaneType.Driving))
         env.right_lane_exists = ((right_lane is not None) and 
                                  (right_lane.lane_type == carla.LaneType.Driving))
-        # print(f"left exist: {env.left_lane_exists}, right exist:{env.right_lane_exists}")
         
-        # env.left_lane_exists = True   # TODO: Replace with actual check
-        # env.right_lane_exists = True  # TODO: Replace with actual check
-        
-        # =====================================================================
-        # TODO: Detect traffic vehicles
-        # =====================================================================
         # Initialize defaults
         env.vehicle_ahead = False
         env.vehicle_ahead_distance = self.config.detection_range
         env.vehicle_ahead_speed = 0.0
         env.left_lane_clear = True
         env.right_lane_clear = True
-        
-        # TODO: Loop through self.traffic_vehicles and check each one
+
+        # Loop through self.traffic_vehicles and check each one
         for traffic in self.traffic_vehicles:
             if not traffic.is_alive:
                 continue
-
+            # get traffic transform
             traffic_transform: carla.Transform = traffic.get_transform()
             
             # Calculate relative position
             rel_x, rel_d = self._calculate_relative_position(
                 ego_transform, traffic_transform
             )
-            
-        #     # TODO: Check if vehicle is in same lane (use rel_d and lane_width)
-        #     # TODO: If in same lane and ahead (rel_x > 0), update vehicle_ahead info
-        #     # TODO: Check if vehicle is in left lane, update left_lane_clear
-        #     # TODO: Check if vehicle is in right lane, update right_lane_clear
-
+         
             # Vehical ahead
             if (((abs(rel_d)) < (self.config.lane_width /2.0)) and (rel_x > 0)):
+                # Calculate traffic velocity and speed 
                 traffic_velocity: carla.Vector3D = traffic.get_velocity()
                 traffic_speed :float= np.sqrt(traffic_velocity.x**2 + traffic_velocity.y**2)
 
@@ -825,13 +804,13 @@ class CarlaInterface:
             #     env.vehicle_ahead_speed = 0.0
             
             # Vehicle Left
-            if ((rel_x > 0) and (self.config.lane_width /2.0 < rel_d) and (rel_d < 1.5 * self.config.lane_width )):
+            if ((self.config.lane_width /2.0 < rel_d) and (rel_d < 1.5 * self.config.lane_width )):
                 env.left_lane_clear = False
             # else:
             #     env.left_lane_clear = True
 
             # Vehicle Right
-            if ((rel_x > 0) and(-1.5 * self.config.lane_width < rel_d) and (rel_d < -self.config.lane_width /2.0)):
+            if ((-1.5 * self.config.lane_width < rel_d) and (rel_d < -self.config.lane_width /2.0)):
                 env.right_lane_clear = False
             # else:
             #     env.right_lane_clear = True
