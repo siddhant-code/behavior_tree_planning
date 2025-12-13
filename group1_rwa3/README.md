@@ -70,6 +70,16 @@ python3 test_behavior_tree.py
 python3 bt_nodes.py
 python3 behavior_tree.py
 ```
+## Implementation Notes
+
+Key decisions:
+
+1. Three driving scenarios were implemented: lane keeping, vehicle following, and overtaking.
+2. When the vehicle detects another vehicle ahead, it attempts to change lanes if it is safe; otherwise, it follows the leading vehicle.
+3. The vehicle’s default behavior is to maintain its lane.
+4. Matplotlib was used for visualization and to verify the correctness of the implementation.
+5. The target *d* value is defined relative to the ego vehicle’s current lateral position within the lane.
+
 
 ## Output
 

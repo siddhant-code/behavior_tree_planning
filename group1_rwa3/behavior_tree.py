@@ -45,9 +45,7 @@ class BehaviorPlanner:
     
     def _build_tree(self) -> Node:
         """
-        TODO: Implement this method to build the behavior tree.
-        
-        Required Tree Structure:
+        Tree Structure:
         
             Root [Selector]
             ├── Lane Change [Sequence]
@@ -80,7 +78,6 @@ class BehaviorPlanner:
             root = Selector("Root", [lane_change_seq, follow_seq, keep_seq])
             return root
         """
-        # TODO: Implement the behavior tree structure
         # Hint: Use Sequence for each behavior branch, Selector for the root
 
         lane_change_seq = Sequence("LaneChange",

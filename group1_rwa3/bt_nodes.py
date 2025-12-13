@@ -50,7 +50,6 @@ class IsVehicleAhead(ConditionNode):
     
     def update(self) -> Status:
         """
-        TODO: Implement this method.
         
         Logic:
         1. Get environment state from blackboard
@@ -66,8 +65,6 @@ class IsVehicleAhead(ConditionNode):
             Status.SUCCESS if blocking vehicle ahead
             Status.FAILURE otherwise
         """
-        # TODO: Implement this condition
-        # Hint: Access environment with blackboard.env_state
 
         is_vehicle_ahead = blackboard.env_state.vehicle_ahead
         if is_vehicle_ahead:
@@ -98,7 +95,6 @@ class IsVehicleSlow(ConditionNode):
     
     def update(self) -> Status:
         """
-        TODO: Implement this method.
         
         Logic:
         1. Get environment state from blackboard
@@ -136,7 +132,6 @@ class IsLaneChangeSafe(ConditionNode):
     
     def update(self) -> Status:
         """
-        TODO: Implement this method.
         
         Logic:
         1. Get environment state from blackboard
@@ -154,7 +149,6 @@ class IsLaneChangeSafe(ConditionNode):
             Status.SUCCESS if lane change is safe
             Status.FAILURE otherwise
         """
-        # TODO: Implement this condition
         
         # left lane
         is_left_lane_available = blackboard.env_state.left_lane_exists
@@ -194,8 +188,7 @@ class SetLaneKeepCommand(ActionNode):
         self.speed_limit = speed_limit
         
     def update(self) -> Status:
-        """
-        TODO: Implement this method.
+        """   
         
         Logic:
         1. Create a BehaviorCommand with:
@@ -209,7 +202,6 @@ class SetLaneKeepCommand(ActionNode):
         Returns:
             Status.SUCCESS always
         """
-        # TODO: Implement this action
         behavior_command: BehaviorCommand = BehaviorCommand()
     
         behavior_command.behavior = BehaviorType.LANE_KEEP
@@ -234,7 +226,6 @@ class SetFollowCommand(ActionNode):
     
     def update(self) -> Status:
         """
-        TODO: Implement this method.
         
         Logic:
         1. Get environment state from blackboard
@@ -251,7 +242,6 @@ class SetFollowCommand(ActionNode):
         Returns:
             Status.SUCCESS always
         """
-        # TODO: Implement this action
         vehicle_ahead_speed = blackboard.env_state.vehicle_ahead_speed
 
         follow_speed = vehicle_ahead_speed - self.speed_buffer
@@ -283,7 +273,6 @@ class SetLaneChangeCommand(ActionNode):
     
     def update(self) -> Status:
         """
-        TODO: Implement this method.
         
         Logic:
         1. Get target_lane from blackboard: blackboard.get('target_lane')
@@ -301,7 +290,7 @@ class SetLaneChangeCommand(ActionNode):
         Returns:
             Status.SUCCESS always
         """
-        # TODO: Implement this action
+       
         target_lane = blackboard.get('target_lane')
 
         if target_lane == 'left':
