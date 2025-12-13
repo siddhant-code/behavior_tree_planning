@@ -819,23 +819,22 @@ class CarlaInterface:
                 env.vehicle_ahead = True
                 env.vehicle_ahead_distance = rel_x
                 env.vehicle_ahead_speed = traffic_speed
-            else:
-                env.vehicle_ahead = False
-                env.vehicle_ahead_distance = self.config.detection_range
-                env.vehicle_ahead_speed = 0.0
+            # else:
+            #     env.vehicle_ahead = False
+            #     env.vehicle_ahead_distance = self.config.detection_range
+            #     env.vehicle_ahead_speed = 0.0
             
             # Vehicle Left
-            
             if ((rel_x > 0) and (self.config.lane_width /2.0 < rel_d) and (rel_d < 1.5 * self.config.lane_width )):
                 env.left_lane_clear = False
-            else:
-                env.left_lane_clear = True
+            # else:
+            #     env.left_lane_clear = True
 
             # Vehicle Right
             if ((rel_x > 0) and(-1.5 * self.config.lane_width < rel_d) and (rel_d < -self.config.lane_width /2.0)):
                 env.right_lane_clear = False
-            else:
-                env.right_lane_clear = True
+            # else:
+            #     env.right_lane_clear = True
 
         return env
     
