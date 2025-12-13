@@ -68,8 +68,19 @@ class IsVehicleAhead(ConditionNode):
         """
         # TODO: Implement this condition
         # Hint: Access environment with blackboard.env_state
-        
-        pass  # Remove this line when implementing
+
+        is_vehicle_ahead = blackboard.env_state.vehicle_ahead
+        if is_vehicle_ahead:
+            vehicle_ahead_distance = blackboard.env_state.vehicle_ahead_distance
+            vehicle_ahead_speed = blackboard.env_state.vehicle_ahead_speed
+            speed_limit = blackboard.env_state.speed_limit
+
+            if vehicle_ahead_distance < self.distance_threshold:
+                speed_diff = speed_limit - vehicle_ahead_speed
+                if 1 < speed_diff:
+                    return Status.SUCCESS
+        return Status.FAILURE
+
 
 
 class IsVehicleSlow(ConditionNode):
@@ -99,9 +110,15 @@ class IsVehicleSlow(ConditionNode):
             Status.SUCCESS if vehicle ahead is slow
             Status.FAILURE otherwise
         """
-        # TODO: Implement this condition
-        
-        pass  # Remove this line when implementing
+        is_vehicle_ahead = blackboard.env_state.vehicle_ahead
+        if is_vehicle_ahead:
+            vehicle_ahead_speed = blackboard.env_state.vehicle_ahead_speed
+            speed_limit = blackboard.env_state.speed_limit
+            speed_diff = speed_limit - vehicle_ahead_speed
+            if  self.slow_threshold < speed_diff:
+                return Status.SUCCESS
+            
+        return Status.FAILURE
 
 
 class IsLaneChangeSafe(ConditionNode):
@@ -139,7 +156,27 @@ class IsLaneChangeSafe(ConditionNode):
         """
         # TODO: Implement this condition
         
-        pass  # Remove this line when implementing
+        # left lane
+        is_left_lane_available = blackboard.env_state.left_lane_exists
+
+        if is_left_lane_available:
+            is_left_lane_clear = blackboard.env_state.left_lane_clear
+            if is_left_lane_clear:
+                blackboard.set('target_lane', 'left')
+                return Status.SUCCESS
+        
+        # right lane
+        is_right_lane_available = blackboard.env_state.right_lane_exists
+
+        if is_right_lane_available:
+            is_right_lane_clear = blackboard.env_state.right_lane_clear
+            if is_right_lane_clear:
+                blackboard.set('target_lane', 'right')
+                return Status.SUCCESS
+                
+        return Status.FAILURE
+  
+        
 
 
 # =============================================================================
@@ -155,7 +192,7 @@ class SetLaneKeepCommand(ActionNode):
     def __init__(self, speed_limit: float = SPEED_LIMIT):
         super().__init__("SetLaneKeepCommand")
         self.speed_limit = speed_limit
-    
+        
     def update(self) -> Status:
         """
         TODO: Implement this method.
@@ -173,8 +210,16 @@ class SetLaneKeepCommand(ActionNode):
             Status.SUCCESS always
         """
         # TODO: Implement this action
-        
-        pass  # Remove this line when implementing
+        behavior_command: BehaviorCommand = BehaviorCommand()
+    
+        behavior_command.behavior = BehaviorType.LANE_KEEP
+        behavior_command.target_d = blackboard.env_state.ego_d
+        behavior_command.target_speed = self.speed_limit
+        behavior_command.T = 3.0 
+
+        blackboard.behavior_command = behavior_command
+
+        return Status.SUCCESS
 
 
 class SetFollowCommand(ActionNode):
@@ -207,8 +252,22 @@ class SetFollowCommand(ActionNode):
             Status.SUCCESS always
         """
         # TODO: Implement this action
+        vehicle_ahead_speed = blackboard.env_state.vehicle_ahead_speed
+
+        follow_speed = vehicle_ahead_speed - self.speed_buffer
+
+        if 0 <= follow_speed:
+            behavior_command: BehaviorCommand = BehaviorCommand()
+
+            behavior_command.behavior = BehaviorType.FOLLOW_VEHICLE
+            behavior_command.target_d = blackboard.env_state.ego_d
+            behavior_command.target_speed = follow_speed
+            behavior_command.T = 5.0 
+
+            blackboard.behavior_command = behavior_command
+
+        return Status.SUCCESS
         
-        pass  # Remove this line when implementing
 
 
 class SetLaneChangeCommand(ActionNode):
@@ -243,8 +302,26 @@ class SetLaneChangeCommand(ActionNode):
             Status.SUCCESS always
         """
         # TODO: Implement this action
+        target_lane = blackboard.get('target_lane')
+
+        if target_lane == 'left':
+            behavior = BehaviorType.LANE_CHANGE_LEFT
+            target_d =   blackboard.env_state.ego_d + self.lane_width
+        elif target_lane == 'right':
+            behavior = BehaviorType.LANE_CHANGE_RIGHT
+            target_d =   blackboard.env_state.ego_d - self.lane_width
         
-        pass  # Remove this line when implementing
+        behavior_command: BehaviorCommand = BehaviorCommand()
+
+        behavior_command.behavior = behavior
+        behavior_command.target_d = target_d 
+        behavior_command.target_speed = self.speed_limit
+        behavior_command.T = 4.0
+
+        blackboard.behavior_command = behavior_command
+
+        return Status.SUCCESS
+
 
 
 # =============================================================================

@@ -1,0 +1,51 @@
+============================================================
+BEHAVIOR TREE UNIT TESTS
+============================================================
+
+--- Condition Node Tests ---
+
+IsVehicleAhead:
+  [PASS] No vehicle ahead -> FAILURE
+  [PASS] Vehicle far (70m) -> FAILURE
+  [PASS] Vehicle close and slow -> SUCCESS
+
+IsVehicleSlow:
+  [PASS] No vehicle -> FAILURE
+  [PASS] Fast vehicle (29 m/s) -> FAILURE
+  [PASS] Slow vehicle (22 m/s) -> SUCCESS
+
+IsLaneChangeSafe:
+  [PASS] Both clear -> SUCCESS, target=left
+  [PASS] Only right clear -> SUCCESS, target=right
+  [PASS] No lanes clear -> FAILURE
+
+--- Action Node Tests ---
+
+SetLaneKeepCommand:
+  [PASS] behavior=lane_keep, d=0.0, v=31.0
+
+SetFollowCommand:
+  [PASS] behavior=follow_vehicle, v=21.0 (expected ~21.0)
+
+SetLaneChangeCommand (left):
+  [PASS] behavior=lane_change_left, d=3.5
+
+SetLaneChangeCommand (right):
+  [PASS] behavior=lane_change_right, d=-3.5
+
+--- Behavior Planner Integration Tests ---
+
+Empty road scenario:
+  [PASS] Empty road -> lane_keep
+
+Slow vehicle, left clear:
+  [PASS] Slow vehicle, can pass -> lane_change_left
+
+Vehicle ahead, lanes blocked:
+  [PASS] Can't pass -> follow_vehicle
+
+============================================================
+RESULTS: 16 passed, 0 failed
+============================================================
+
+✅ All tests passed! Your implementation is correct.
